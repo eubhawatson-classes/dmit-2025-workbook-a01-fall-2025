@@ -13,6 +13,39 @@
     <section class="row min-vh-100 align-items-center justify-content-center">
         <div class="col-lg-8">
             <h1 class="display-5 mb-4">Basic Arithmetic</h1>
+
+            <?php 
+                // We'll set up our variables here, but we can reassign the values over and over again.
+
+                $num1 = 3;
+                $num2 = 6;
+
+                // Addition
+                $num3 = $num1 + $num2;
+                echo "<p>The sum of $num1 and $num2 is $num3.</p>";
+
+                // Subtraction
+                $num3 = $num1 - $num2;
+                echo "<p>$num2 taken away from $num1 is $num3.</p>";
+
+                // Multiplication
+                $num3 = $num1 * $num2;
+                echo "<p>$num1 multiplied by $num2 equals $num3.</p>";
+
+                // Division
+                $num3 = $num1 / $num2;
+                echo "<p>$num1 divided by $num2 equals $num3.</p>";
+
+                // Exponentiation
+                $exponent = 4 ** 2; 
+                echo "<p>4 raised to the power of 2 is $exponent.</p>";
+
+                // Modulus (Remainder)
+                $dividend = 5;
+                $divisor = 2;
+                $quotient = $dividend % $divisor;
+                echo "<p>$dividend divided by $divisor has a remainder of $quotient.</p>";
+            ?>
             
             <a href="index.php" class="btn btn-outline-primary">Return to Table of Contents</a>
         </div>
