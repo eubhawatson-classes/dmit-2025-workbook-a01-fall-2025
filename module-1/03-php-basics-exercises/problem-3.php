@@ -17,13 +17,6 @@ echo "<p>The sum of each individual value in $string is $total.</p>";
 
 ?>
 
-<form action="problem-3.php" method="POST">
-    <label for="num-string">Please enter a number:</label>
-    <input type="number" id="num-string" name="num-string">
-
-    <input type="submit" id="submit" name="submit" value="Submit">
-</form>
-
 
 <a href="index.php" class="btn btn-outline-primary">Back to Table of Contents</a>
 
