@@ -215,16 +215,54 @@
        * 3. Some sort of change where the condition can approach FALSE; this is usually an increment (++) or decrement (--).
        */
 
+      $cats = 1;
+
+      // This is a test-first (or pre-test) loop. We check to see if the condition is met before executing the loop.
+      while ($cats <= 5) {
+        echo "<p>I currently have $cats cats.</p>";
+        //echo "<p>Let's add one more.</p>";
+        $cats++;
+      }
+
       ?>
 
       <h3 class="my-3">Do/While Loop</h3>
       <p class="lead">Runs code <em>at least once</em>, then keeps looping if the condition is still <code>true</code>.</p>
 
+    <?php
+      
+      // This is a test-last (or post-test) loop. Because the condition is at the end, the loop will always be executed at least once.
+      do {
+        echo "<p>I currently have $cats cats.</p>";
+        $cats++;
+      } while ($cats <= 10);
+
+    ?>
+
       <h3 class="my-3">For Loop</h3>
       <p class="lead">Repeats code a specific number of times using a counter: <code>for (start; condition; update)</code>.</p>
 
+      <?php
+      
+      // This is a test-first or pre-test loop.
+      for ($i = 0; $i < 10; $i++) {
+        echo "<p>Counter value: $i</p>";
+      }
+
+      ?>
+
       <h3 class="my-3">For Each Loop</h3>
       <p class="lead">Loops through each item in an array using <code>foreach ($array as $item)</code>.</p>
+
+      <?php
+      
+        // We're going to use a superglobal array today ($_SERVER). This array keeps tonnes of information about the server, its states, and other things related to PHP. While it should never be echoed out to the user in production, we will use some of its values later on in the term.
+
+        foreach ($_SERVER as $key => $value) {
+          echo "<p>$key : $value</p>";
+        }
+
+      ?>
     </div>
   </section>
 </body>
