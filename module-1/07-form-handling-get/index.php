@@ -74,5 +74,22 @@ $oven_temperature = ($temperature_units == 'C') ? '165&deg;C' : '325&deg;F';
  </section>
 
 <!-- Directions -->
+ <section class="mb-5">
+    <h2 class="mb-3">Directions</h2>
+
+    <ol class="list-group list-group-numbered">
+        <li class="list-group-item">Preheat the oven to <strong><?= $oven_temperature; ?></strong>. Line <strong><?= $recipe_yield; ?></strong> muffin cups with papers liners.</li>
+        
+        <li class="list-group-item">Beat sugar and butter with an electric mixer in a large bowl until smooth and creamy. Beat first egg into butter mixture until completely blended; beat in vanilla extract with remaining egg.</li>
+        
+        <li class="list-group-item">Mix bananas, milk, and cinnamon together in a separate bowl; stir into creamed butter mixture. Whisk flour, baking powder, baking soda, and salt together in a separate bowl; slowly stir into banana-butter mixture until batter is just mixed. Fold oats and walnuts into batter.</li>
+        
+        <li class="list-group-item">Scoop batter into the muffin cups using a large ice-cream scoop.</li>
+
+        <li class="list-group-item">Bake in the preheated oven until a toothpick inserted in the centers of the muffins comes out clean, 25 to 35 minutes.</li>
+    </ol>
+
+    <p class="my-3"><strong>Recipe Yield</strong>: <?= $recipe_yield; ?> muffins.</p>
+ </section>
 
 <?php include 'includes/footer.php'; ?>
