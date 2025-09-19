@@ -15,8 +15,6 @@ switch (TRUE) {
         break;
 }
 
-include 'process.php';
-
 ?>
 
 <!doctype html>
@@ -61,6 +59,9 @@ include 'process.php';
                     </div> <!-- end of .col -->
 
                     <div class="col-md-6">
+                        <!-- In our processing script, we will echo out the final calculations if the user has given us all the information we need. We're putting it here so that the final results show up near the top of the page. -->
+                        <?php include 'process.php'; ?>
+
                         <!-- Let's start by asking the user how many numbers are in their data set (i.e. how many inputs are needed in the second form). -->
                         <form action="<?= htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="GET" class="mb-5">
                             <div class="mb-3">
