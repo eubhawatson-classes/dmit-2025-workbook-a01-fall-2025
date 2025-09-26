@@ -13,7 +13,7 @@ $experience = isset($_POST['experience']) ? trim($_POST['experience']) : '';
 $region = isset($_POST['region']) ? $_POST['region'] : '';
 $department = isset($_POST['department']) ? $_POST['department'] : '';
 $training = isset($_POST['training']) ? $_POST['training'] : []; // Checkbox data is an array, so our default here is an empty array rather than an empty string.
-$loyalty = isset($_POST['loyalty']) ? $_POST['loyalty'] : '';
+$loyalty = isset($_POST['loyalty']) ? $_POST['loyalty'] : 5;
 $referral = isset($_POST['referral']) ? $_POST['referral'] : '';
 
 // Long Answer
