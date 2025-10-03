@@ -121,15 +121,15 @@ if (isset($_POST['submit'])) {
             $minimum_age = $today->modify('-18 years');
 
             if ($dob_object > $minimum_age) {
-                $message_dob = "<p class=\"warning-text\">You must be at least 18 years old to apply.</p>";
+                $message_dob = "<p class=\"text-warning\">You must be at least 18 years old to apply.</p>";
             }
 
         } else {
-            $message_dob = "<p class=\"warning-text\">Please enter a valid date.</p>";
+            $message_dob = "<p class=\"text-warning\">Please enter a valid date.</p>";
         }
 
     } else {
-        $message_dob = "<p class=\"warning-text\">Your date of birth is required.</p>";
+        $message_dob = "<p class=\"text-warning\">Your date of birth is required.</p>";
     }
 
     if ($message_dob != "") {
@@ -255,7 +255,7 @@ if (isset($_POST['submit'])) {
         For any of the conditions we're checking for below to be triggered, something ... dodgy has to be afoot. We'll combine them all into a compound OR statement.
     */
 
-    if ($loyalty === "" || !is_numeric($loyalty) || $loaylty < 0 || $loaylty > 10) {
+    if ($loyalty === "" || !is_numeric($loyalty) || $loyalty < 0 || $loyalty > 10) {
         $message_loyalty = "<p class=\"text-warning\">Please choose a whole number between 0 and 10.</p>";
     }
 
@@ -288,7 +288,7 @@ if (isset($_POST['submit'])) {
         } elseif (!filter_var($evil_plan, FILTER_SANITIZE_SPECIAL_CHARS)) {
             // This filter list strips out any characters with an ASCII value below 32, which include things like system I/O.
             $message_evil_plan = "<p class=\"text-warning\">As delightfully diabolical as that was, please write another plan.</p>";
-        } elseif (strlen($evil_plan) < 256) {
+        } elseif (strlen($evil_plan) > 255) {
             $message_evil_plan = "<p class=\"text-warning\">Your plan must be 255 characters or fewer.</p>";
         }
 

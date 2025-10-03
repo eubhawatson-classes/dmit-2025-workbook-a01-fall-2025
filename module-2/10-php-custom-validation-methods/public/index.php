@@ -109,7 +109,7 @@ require '../private/process-form.php';
 
                     <div class="mb-4">
                      <?php if ($message_region != '') echo $message_region; ?>
-                     <label for="region" class="form-label">Preferred Global Region for Assignments:</label>
+                     <label for="region" class="form-label">Preferred Global Region for Assignments (Optional):</label>
                      <input list="region-options" id="region" name="region" class="form-control" value="<?= $region; ?>">
 
                      <datalist id="region-options">
@@ -224,6 +224,7 @@ require '../private/process-form.php';
 
                     <!-- Textarea -->
                      <div class="mb-4">
+                        <?php if ($message_evil_plan != "") echo $message_evil_plan; ?>
                         <label for="evil-plan" class="form-label">In 255 characters or fewer, describe your most diabolical plan to date:</label>
                         <textarea name="evil-plan" id="evil-plan" class="form-control" placeholder="e.g., sharks with frickin' lasers beams attached to their heads ..."><?= $evil_plan; ?></textarea>
                      </div>
