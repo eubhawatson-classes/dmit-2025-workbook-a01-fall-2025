@@ -171,6 +171,136 @@ if (isset($_POST['submit'])) {
         $form_good = FALSE;
     }
 
+    /*
+        NUMBERS
+
+        For this particular field, we want to make sure:
+
+        1. It's a number.
+        2. It's a whole number.
+        3. It's within a reasonable range (0-60).
+    */
+
+        if ($experience == "") {
+            $message_experience = "<p class=\"text-warning\">This field is required. Please enter a whole number (even if it is 0).</p>";
+        } elseif (!is_numeric($experience)) {
+            $message_experience = "<p class=\"text-warning\">Please enter a number.</p>";
+        } elseif (!ctype_digit($experience)) {
+            $message_experience = "<p class=\"text-warning\">Please enter a valid whole number.</p>";
+        } elseif ($experience < 0 || $experience > 60) {
+            $message_experience = "<p class=\"text-warning\">Experience must be between 0 and 60 years.</p>";
+        }
+
+        if ($message_experience != "") {
+            $form_good = FALSE;
+        }
+
+    /*
+        DATA LISTS
+    */
+
+    if (!is_blank($region)) {
+        if (strlen($region) > 128) {
+            $message_region = "<p class=\"text-warning\">Your response must be 128 characters or fewer.</p>";
+        } elseif (!preg_match("/^[a-zA-Z0-9 .,'()&\-\/]+$/", $region)) {
+            $message_region = "<p class=\"text-warning\">Region name contains invalid characters.</p>";
+        }
+    } // else, if the region is blank, we leave it alone.
+
+    if ($message_region != "") {
+        $form_good = FALSE;
+    }
+
+    /*
+        RADIO BUTTONS
+
+        After a presence check, we'll see if the value the user submitted is an allowed value (as there are only four discrete values allowed).
+    */
+
+    $valid_departments = ['traps', 'doomsday', 'monologue', 'it'];
+
+    if (is_blank($department)) {
+        $message_department = "<p class=\"text-warning\">Please select a department.</p>";
+    } elseif (!in_array($department, $valid_departments)) {
+        $message_department = "<p class=\"text-warning\">Invalid department selection. Please choose from the provided options.</p>";
+    }
+
+    if ($message_department != "") {
+        $form_good = FALSE;
+    }
+
+    /*
+        CHECKBOXES
+
+        Checkboxes work largely in the same way that radio buttons do, but with one key difference: instead of submitting a single value, a user may submit multiple. This means that any time we use checkboxes, we're creating an array. 
+
+        To validate, we will be comparing each item inside of the array of submitted values against our list of allowed values. 
+    */
+
+    $valid_training = ['lava', 'sharks', 'lifting', 'buttons', 'hostages', 'evacuation', 'retention'];
+
+    if (!empty($training)) {
+        foreach ($training as $value) {
+            if (!in_array($value, $valid_training)) {
+                $message_training = "<p class=\"text-warning\">Your value is not allowed. As delightfully evil as that is, please select an answer from the provided options.</p>";
+                $form_good = FALSE;
+                break;
+            }
+        }
+    }
+
+    /*
+        RANGE SLIDER
+
+        For any of the conditions we're checking for below to be triggered, something ... dodgy has to be afoot. We'll combine them all into a compound OR statement.
+    */
+
+    if ($loyalty === "" || !is_numeric($loyalty) || $loaylty < 0 || $loaylty > 10) {
+        $message_loyalty = "<p class=\"text-warning\">Please choose a whole number between 0 and 10.</p>";
+    }
+
+    if ($message_loyalty != "") {
+        $form_good = FALSE;
+    }
+
+    /*
+        DROPDOWN
+    */
+
+    $valid_referrals = ['classified-ad', 'social-media', 'word-of-mouth', 'mixer', 'kidnapping', 'family', 'announcement'];
+
+    if ($referral === "") {
+        $message_referral = "<p class=\"text-warning\">Please select a referral source.</p>";
+    } elseif (!in_array($referral, $valid_referrals)) {
+        $message_referral = "<p class=\"text-warning\">Please choose from the provided options.</p>";
+    }
+
+    if ($message_referral != "") {
+        $form_good = FALSE;
+    }
+
+    /*
+        LONG ANSWER
+    */
+
+        if (is_blank($evil_plan)) {
+            $message_evil_plan = "<p class=\"text-warning\">Please write an evil plan.</p>";
+        } elseif (!filter_var($evil_plan, FILTER_SANITIZE_SPECIAL_CHARS)) {
+            // This filter list strips out any characters with an ASCII value below 32, which include things like system I/O.
+            $message_evil_plan = "<p class=\"text-warning\">As delightfully diabolical as that was, please write another plan.</p>";
+        } elseif (strlen($evil_plan) < 256) {
+            $message_evil_plan = "<p class=\"text-warning\">Your plan must be 255 characters or fewer.</p>";
+        }
+
+    if ($message_evil_plan != "") {
+        $form_good = FALSE;
+    }
+
+    // If the user input passes all of our tests, we'll reward the user with a success message to let them know that everything went through. At this point, if we were staying on the same page, we may also want to blank-out / reset our vaariables so that they can't submit the form multiple times. 
+
+    if ($form_good == TRUE) {
+        header("Location: thank-you.php");
+    }
 }
 
 ?>
