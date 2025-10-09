@@ -1,3 +1,13 @@
+<?php
+
+// These two lines of code import our credentials (i.e. the things MySQL needs in order to be authenticated and access the database) and create a connection handle. We use 'require' rather than 'include' because if the fille cannot be found or if PHP can't login to the database, the engine will throw a fatal error and the page won't load.
+
+// `__DIR__` gives us the script's current directory. The `2` then lets us jump two levels up. Finally, the appended path then brings us into the data/ directory, where our connection information is. 
+require_once dirname(__DIR__, 2) . '/data/connect.php';
+$connection = db_connect();
+
+?>
+
 <!doctype html>
 <html lang="en">
 
@@ -22,9 +32,65 @@
 
                 <h3 class="mt-4">Question 1: Which city has the highest population?</h3>
 
+                <?php
+                
+                // First, let's write the statement PHP needs to execute.
+                $sql = "SELECT city_name FROM cities ORDER BY population DESC LIMIT 1;";
+
+                // We need to actually run the statment and fetch the results.
+                $result = mysqli_query($connection, $sql);
+
+                // This checks to see if we got at least one record from the database.
+                if (mysqli_num_rows($result) > 0) {
+                    $row = mysqli_fetch_assoc($result);
+                    echo "<p>The city with the highest population is " . $row['city_name'] . ".</p>";
+                } else {
+                    echo "<p>No cities found.</p>";
+                }
+
+                ?>
+
                 <h3 class="mt-4">Question 2: What are the names of all of the cities stored in our database, in alphabetical order?</h3>
 
+                <?php
+                
+                $sql = "SELECT city_name FROM cities ORDER BY city_name ASC;";
+
+                $result = mysqli_query($connection, $sql);
+
+                if (mysqli_num_rows($result) > 0) {
+                    // We're initialising a simple indexed array here to store all of our records. 
+                    $cities = array();
+
+                    // We need to loop through each row in order to get all the names we need. 
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $cities[] = $row['city_name'];
+                    }
+
+                    // Finally, we can output our results to the user. Here, we're using an array implosion method that takes all of the items in the $cities[] array that we just made and separates them with a comma.
+                    echo "<p>The following cities are currently stored in our database: " . implode(', ', $cities) . ".</p>";
+                } else {
+                    echo "<p>No cities found.</p>";
+                }
+
+                ?>
+
                 <h3 class="mt-4">Question 3: Which cities are located in the province of "QC" (Quebec)?</h3>
+
+                <?php
+                
+                $sql = "SELECT city_name FROM cities WHERE province = 'QC';";
+                $result = mysqli_query($connection, $sql);
+
+                if (mysqli_num_rows($result) > 0) {
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        echo "<p>" . $row['city_name'] . "</p>";
+                    }
+                } else {
+                    echo "<p>No cities found.</p>";
+                }
+
+                ?>
 
                 <h3 class="mt-4">Question 4: Count the number of cities in each province.</h3>
 
@@ -46,3 +112,9 @@
         </main>
     </body>
 </html>
+
+<?php
+
+db_disconnect($connection);
+
+?>
