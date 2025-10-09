@@ -58,7 +58,13 @@ SELECT population, city_name FROM cities ORDER BY population DESC LIMIT 3, 3;
 */
 
 -- So, how might we select only cities? 
+SELECT city_name, population FROM cities WHERE population >= 10000;
 
 -- What about only towns?
+SELECT city_name, population FROM cities WHERE population >= 1000 AND population < 10000;
 
 -- Only villages? 
+SELECT city_name, population FROM cities WHERE population >= 300 AND < population < 1000;
+
+-- We could also use the BETWEEN clause to the same effect; howeveer, it is inclusive, so we have to adjust our ceiling. 
+SELECT city_name, population FROM cities WHERE population BETWEEN 300 AND 999;
