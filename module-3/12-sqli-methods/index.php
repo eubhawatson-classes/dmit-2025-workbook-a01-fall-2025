@@ -94,19 +94,166 @@ $connection = db_connect();
 
                 <h3 class="mt-4">Question 4: Count the number of cities in each province.</h3>
 
+                <?php
+                
+                $sql = "SELECT province, COUNT(*) AS city_count FROM cities GROUP BY province;";
+                $result = mysqli_query($connection, $sql);
+
+                if (mysqli_num_rows($result) > 0) : ?>
+
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Province or Territory</th>
+                                <th>Number of Cities</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($row = mysqli_fetch_assoc($result)) : ?>
+                                <tr>
+                                    <td><?= $row['province']; ?></td>
+                                    <td><?= $row['city_count'];  ?></td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+
+                <?php else : ?>
+                     
+                <p>No cities found.</p>
+
+                <?php endif; ?>
+
                 <h3 class="mt-4">Question 5: Retrieve the city names and populations for cities with a population greater than 500,000.</h3>
 
-                <h3 class="mt-4">Question 6: Sort the cities in alphabetical order by their names.</h3>
+                <?php
+                
+                $sql = "SELECT city_name, population FROM cities WHERE population > 500000;";
+                $result = mysqli_query($connection, $sql);
 
-                <h3 class="mt-4">Question 7: Calculate the average population of all cities.</h3>
+                if (mysqli_num_rows($result) > 0) {
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        echo "<p>" . $row['city_name'] . "'s population is " . number_format($row['population']) . ".</p>";
+                    }
+                } else {
+                    echo "<p>No cities found.</p>";
+                }
 
-                <h3 class="mt-4">Question 8: Find the city with the smallest population.</h3>
+                ?>
 
-                <h3 class="mt-4">Question 9: List the cities located in provinces starting with the letter "N".</h3>
+                <h3 class="mt-4">Question 6: Calculate the average population of all cities.</h3>
 
-                <h3 class="mt-4">Question 10: Retrieve the city names and populations for cities with populations between 100,000 and 500,000.</h3>
+                <?php
 
-                <h3 class="mt-4">Question 11: Retrieve the total population for each province in the "cities" table.</h3>
+                /*
+                    While the AVG(*) aggregate function does all of the heavy lifting here, it can produce a number with a long or infinitely repeating decimal. 
+
+                    We can use number_format() (again) to round it to a specified decimal place and add commas.
+                */
+                
+                $sql = "SELECT AVG(population) AS average_population FROM cities;";
+                $result = mysqli_query($connection, $sql);
+
+                if (mysqli_num_rows($result) > 0) {
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        echo "<p>The average population of all cities in our database is " . number_format($row['average_population']) . ".</p>";
+                    }
+                } else {
+                    echo "<p>No cities found.</p>";
+                }
+
+                ?>
+
+                <h3 class="mt-4">Question 7: Find the city with the smallest population.</h3>
+
+                <?php
+                
+                $sql = "SELECT city_name, population FROM cities ORDER BY population ASC LIMIT 1;";
+                $result = mysqli_query($connection, $sql);
+
+                if (mysqli_num_rows($result) > 0) {
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        echo "<p>The city with the smallest population in our database is " . $row['city_name'] . ", with a population of " . number_format($row['population']) . ".</p>";
+                    }
+                } else {
+                    echo "<p>No cities found.</p>";
+                }
+
+                ?>
+
+                <h3 class="mt-4">Question 8: List the cities located in provinces starting with the letter "N".</h3>
+
+                <?php
+                
+                $sql = "SELECT city_name FROM cities WHERE province LIKE 'N%';";
+                $result = mysqli_query($connection, $sql);
+
+                /*
+                    Let's list all of our cities in a complete sentence. 
+
+                    ... but how do we get the 'and' in the end of the list? 
+
+                    1. Instead of printing everything immediately, story the results in an indexed array ($cities[]).
+                    2. Pop the last city using the array_pop($cities) method. This removes the last city from the array and stores it separately. 
+                    3. Using implode(), the remaining cities can collapse into a string, with commas separating them. 
+                    4. Finally, we can use a little bit of branching logic to account for a case where there's only one city (so we can print it without the extra formatting).
+                */
+
+                if (mysqli_num_rows($result) > 0) {
+                    $cities = [];
+
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $cities[] = $row['city_name'];
+                    }
+
+                    $last_city = array_pop($cities);
+                    $city_list = implode(", ", $cities);
+
+                    // There may be a case where there's only one city. This control struture accounts for that scenario.
+                    if (!empty($city_list)) {
+                        echo "<p>" . $city_list . ", and " . $last_city . " are all cities in a province or territory starting with the letter 'N'.</p>";
+                    } else {
+                        echo "<p>" . $last_city . " is in a province or territory starting with the letter 'N'.</p>";
+                    }
+                } else {
+                    echo "<p>No cities found.</p>";
+                }
+
+                ?>
+
+                <h3 class="mt-4">Question 9: Retrieve the city names and populations for cities with populations between 100,000 and 500,000.</h3>
+
+                <?php
+                
+                $sql = "SELECT city_name, population FROM cities WHERE population BETWEEN 100000 AND 500000;";
+                $result = mysqli_query($connection, $sql);
+
+                if (mysqli_num_rows($result) > 0) {
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        echo "<p>" . $row['city_name'] . " has a population of " . number_format($row['population']) . ".</p>";
+                    }
+                } else {
+                    echo "<p>No cities found.</p>";
+                }
+
+                ?>
+
+                <h3 class="mt-4">Question 10: Retrieve the total population for each province in the "cities" table.</h3>
+
+                <?php
+                
+                $sql = "SELECT province, SUM(population) AS total_population FROM cities GROUP BY province;";
+                $result = mysqli_query($connection, $sql);
+
+                if (mysqli_num_rows($result) > 0) {
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        echo "<p>" . $row['province'] . "'s cities have a total population of " . number_format($row['total_population']) . ".</p>";
+                    }
+                } else {
+                    echo "<p>No cities found.</p>";
+                }
+
+                ?>
 
             </section>
         </main>
