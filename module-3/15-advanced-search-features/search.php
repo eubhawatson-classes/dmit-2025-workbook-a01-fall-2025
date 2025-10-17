@@ -108,11 +108,97 @@ $max = $_GET['life-expectancy-max'] ?? 90;
     If the user chose to include everything, their query would look something like this:
 
     SELECT * FROM happiness_index WHERE 1 = 1
-    AND country LIKE '%$country'
+    AND country LIKE '%$country%'
     AND continent IN ($continents)
     AND wellbeing (> or <) $wellbeing_value
     AND life_expectancy BETWEEN $min AND $max;
+
+    `WHERE 1 = 1` is a syntactical trick for building dynamic queries. Because 1=1 always resolves as TRUE, it doesn't really affect the outcome of anything; however, it lets us start any line that comes after it with AND. This way, we don't have to keep track of whether or not we've included our WHERE clause yet and don't have to worry about the 'grammar' of SQL.
 */
+
+if (isset($_GET['submit'])) {
+    // If the user hits submit, we start by creating a 'results' section in the HTML.
+    echo '<section class="row justify-content-center my-5">';
+    echo '<h2 class="display-5 mb-5">Results</h2>';
+
+    // Because we're building a dynamic query, we may have a different number of placeholders (?s) depending upon what the user chooses to fill out in the search form. Therefore, we're creating this little array to keep track of how many placeholders we need.
+    $parameters = [];
+
+    // Similarly, we also need to say what data types all of our parameters are. This string will be appended with the correct data types whenever we add parameters.
+    $types = '';
+
+    // BIG NOTE: We are not doing a lot in the way of form validation. In the real world, we would need to do robust validation and sanitisation here!
+
+    // Country Search
+    if (!empty($country_search) || $country_search == "") {
+        // We cannot use " AND country LIKE '%?%'" because MariaDB will thing we're just looking for question marks in the country name. Instead, we need to use a MySQL aggregate function. This lets MariaDB know that the ? is a placeholder value, not the thing we're looking for.
+        $query .= " AND `country` LIKE CONCAT('%', ?, '%')";
+
+        // Because this is an array, we can use the assignment operator here and PHP will know to append this value rather than overwrite the whole thing.
+        $parameters[] = $country_search;
+
+        // We'll also add the 'string' data type here.
+        $types .= 's';
+
+    }
+
+    // Continents (Checkboxes)
+
+    // If the user chose 'All Continents' (which has a value of "") or nothing at all, we'll skip this entire block and just not add it to our query.
+    if (!empty($selected_continents) && !in_array("", $selected_continents)) {
+        // Because this is a field of checkboxes, we're working with an array. We need to check to see how many things are in our $selected_continents array. We will then need to use as many placeholders (?s) as there are things checked off by the user.
+
+        // ex. If the user chooses Africa, Middle East, and Latin America, this will add three ?s to our placeholders. Our final string will be '?, ?, ?'. 
+        $placeholders = implode(',', array_fill(0, count($selected_continents), '?'));
+
+        $query .= " AND `continent` IN ($placeholders)";
+
+        foreach ($selected_continents as $key => $continent) {
+            // We need to ensure we're passing variables by reference. This will give MySQLi access to the original values at run time, not copies (which is what usually happens when you pass a variable into a function). Hopefully, this will prevent MySQLi from getting blank values or weird data type mutations.
+            $parameters[] = &$selected_continents[$key];
+            $types .= "i";
+        }
+    }
+
+    // Wellbeing Value (> or <)
+
+    // Did the user give us a number? If not, we don't care.
+    if ($wellbeing_value != "") {
+        // This is a ternary statement that says if our $wellbeing_value is "greater", we'll use the > (greater than) operator; otherwise, we'll use less than (<).
+        $operator = $wellbeing_value == "greater" ? ">" : "<";
+
+        $query .= " AND `wellbeing` $operator ?";
+        $parameters = &$wellbeing_value;
+        // This is a double or a decimal data type.
+        $types .= "d";
+    }
+
+    // Life Expectancy (Range)
+
+    // If we do NOT still have our default values, we'll add this to the query.
+    if ($min != 50 && $max != 90) {
+        $query .= " AND `life_expectancy` BETWEEN ? AND ?";
+
+        // With a range query, we always have two values.
+        $parameters[] = &$min;
+        $parameters[] = &$max;
+
+        // Both of our values are doubles.
+        $types .= "dd";
+    }
+
+    /*
+        FOR DEBUGGING
+
+        If you'd like to see what the query looks like with differetn options, you can echo it out for testing. 
+    */
+
+        echo "<p>" . $query . "</p>";
+        var_dump($parameters);
+        echo "<p>" . $types . "</p>";
+
+    echo '</section>';
+}
 
 ?>
 
