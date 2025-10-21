@@ -132,7 +132,7 @@ if (isset($_GET['submit'])) {
     // BIG NOTE: We are not doing a lot in the way of form validation. In the real world, we would need to do robust validation and sanitisation here!
 
     // Country Search
-    if ($country_search == "") {
+    if ($country_search != "") {
         // We cannot use " AND country LIKE '%?%'" because MariaDB will thing we're just looking for question marks in the country name. Instead, we need to use a MySQL aggregate function. This lets MariaDB know that the ? is a placeholder value, not the thing we're looking for.
         $query .= " AND `country` LIKE CONCAT('%', ?, '%')";
 
