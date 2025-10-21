@@ -12,8 +12,8 @@ $country_search = isset($_GET['country-search']) ? trim(($_GET['country-search']
 $selected_continents = isset($_GET['continents']) ? $_GET['continents'] : array();
 
 // Wellbeing Variables
-$wellbeing_comparison = isset($_GET['wellbeing-comparison']) ?? '';
-$wellbeing_value = isset($_GET['wellbeing-value']) ?? '';
+$wellbeing_comparison = $_GET['wellbeing-comparison'] ?? '';
+$wellbeing_value = $_GET['wellbeing-value'] ?? '';
 
 // Life Expectancy Variables
 $min = $_GET['life-expectancy-min'] ?? 50;
@@ -66,15 +66,15 @@ $max = $_GET['life-expectancy-max'] ?? 90;
         <div class="mb-3">
             <label for="wellbeing-comparison" class="form-label">Only show countries with a score:</label>
             <select name="wellbeing-comparison" id="wellbeing-comparison" class="form-select">
-                <option value="greater" <?php if ($wellbeing_comparison == "above") echo "selected"; ?> >above</option>
-                <option value="less" <?php if ($wellbeing_comparison == "below") echo "selected"; ?> >below</option>
+                <option value="greater" <?php if ($wellbeing_comparison == "greater") echo "selected"; ?> >above</option>
+                <option value="less" <?php if ($wellbeing_comparison == "less") echo "selected"; ?> >below</option>
             </select>
         </div>
 
         <!-- This will be the number for the wellbeing value. -->
         <div class="mb-3">
             <label for="wellbeing-value" class="form-label">the following value:</label>
-            <input type="number" id="wellbeing-value" name="wellbeing-value" min="1" max="10" value="<?= $wellbeing_value; ?>" class="form-control">
+            <input type="number" id="wellbeing-value" name="wellbeing-value" value="<?= $wellbeing_value; ?>" class="form-control">
         </div>
      </fieldset>
 
@@ -121,6 +121,8 @@ if (isset($_GET['submit'])) {
     echo '<section class="row justify-content-center my-5">';
     echo '<h2 class="display-5 mb-5">Results</h2>';
 
+    $query = "SELECT * FROM happiness_index WHERE 1 = 1";
+
     // Because we're building a dynamic query, we may have a different number of placeholders (?s) depending upon what the user chooses to fill out in the search form. Therefore, we're creating this little array to keep track of how many placeholders we need.
     $parameters = [];
 
@@ -130,7 +132,7 @@ if (isset($_GET['submit'])) {
     // BIG NOTE: We are not doing a lot in the way of form validation. In the real world, we would need to do robust validation and sanitisation here!
 
     // Country Search
-    if (!empty($country_search) || $country_search == "") {
+    if ($country_search == "") {
         // We cannot use " AND country LIKE '%?%'" because MariaDB will thing we're just looking for question marks in the country name. Instead, we need to use a MySQL aggregate function. This lets MariaDB know that the ? is a placeholder value, not the thing we're looking for.
         $query .= " AND `country` LIKE CONCAT('%', ?, '%')";
 
@@ -176,7 +178,7 @@ if (isset($_GET['submit'])) {
     // Life Expectancy (Range)
 
     // If we do NOT still have our default values, we'll add this to the query.
-    if ($min != 50 && $max != 90) {
+    if ($min != 50 || $max != 90) {
         $query .= " AND `life_expectancy` BETWEEN ? AND ?";
 
         // With a range query, we always have two values.
@@ -197,7 +199,46 @@ if (isset($_GET['submit'])) {
         var_dump($parameters);
         echo "<p>" . $types . "</p>";
 
-    echo '</section>';
+    // Prepare and execute the SQL statement (query).
+    if ($statement = $connection->prepare($query)) {
+
+        // Technically, the user can submit the search form without filling anything out (i.e., without any parameters or conditions). If they do, we don't need to bind our parameters, we just need to fetch the whole dang table.
+        if ($types != "") {
+            $bind_names = [];
+            $bind_names[] = $types;
+
+            foreach ($parameters as $key => $value) {
+                // What is the & here? The & means that we're passing our value by reference. In PHP, passing by reference means you're giving direct access to the original variable - not just a copy of its value. We need this because we need to bind the original value to our placeholder (?) when we're using prepared statements.
+                $bind_names[] = &$parameters[$key];
+            }
+
+
+            call_user_func_array([$statement, 'bind_param'], $bind_names);
+        }
+
+        $statement->execute();
+        $result = $statement->get_result();
+
+        // Displaying the results
+        if ($result->num_rows > 0) {
+
+            while ($row = $result->fetch_assoc()) {
+                echo '<div class="col-md-6 col-xl-4 mb-4">';
+                include 'includes/country-card.php';
+                echo '</div>';
+            }
+
+        } else { // if there are no results
+            echo '<h3>No results found.</h3>';
+            echo '<p>No countries match your search criteria.</p>';
+        }
+
+    } else { // if preparing the statement fails
+        echo '<h3>Oops!</h3>';
+        echo '<p>There was an error retrieving your results.</p>';
+    }
+
+    echo '</section>'; // end of results section
 }
 
 ?>
