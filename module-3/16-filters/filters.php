@@ -65,24 +65,48 @@ foreach ($_GET as $filter => $values) {
     $active_filters[$filter] = array_map(fn($v) => htmlspecialchars($v, ENT_QUOTES | ENT_HTML5, 'UTF-8'), $values);
 }
 
-function build_query_url($base_url, $filters, $filter, $value) {
-    // The function starts by copying the existing filters into a new variable, $updated_filters. This ensures that the original $filters remains unchanged while we modify the copy.
-    $updated_filters = $filters;
+/**
+ * When the user clicks a filter (actually an achor tag that looks like a button), you want to toggle that value: add it if it isn't there, remove it if it is. Then, we need to rebuild the URL query string for that individual filter. 
+ * 
+ * $base_url - the page you're linking to (filters.php) 
+ * $filters - the CURRENT filters already in the URL (an associative array)
+ * $filter - the CATEGORY you're toggle (e.g continent, wellbeing ...)
+ * $value - the specific VALUE you're toggling (e.g. africa, 6-8 ...)
+ */
+function build_query_url($base_url, $filters, $filter, $value)
+{
+    // Grab the current list for this filter and immediately convert everything to strings so comparisons are sane.
+    $values = array_map('strval', $filters[$filter] ?? []);
 
-    /*
-        This checks to see if the filter value exists.
+    // Same treatment for the incoming value: it's a strong from here on out.
+    $val = (string) $value;
 
-        isset($updated_filters[$filter]) --> checks whether the filter key exists in the array.
+    // Let's do a strict search inside of our array to make sure we only match the thing we expect. The result will be TRUE or FALSE. 
+    $position = array_search($val, $values, TRUE);
 
-        in_array($value, $updated_filters[$filter]) --> checks to see if the value is already present for that filter.
+    if ($position !== FALSE) {
+        // If we found our value in our current query string, this means the user is clicking it for a second time and we need to toggle it OFF.
+        unset($values[$position]);
 
-        If the filter exists and already includes the value, we need to remove (toggle off) that value.
-
-    */
-    if (isset($updated_filters[$filter]) && in_array($value, $updated_filters[$filter])) {
-        
+        // Reindex so we don't end up with scruffy array keys in the query string.
+        $values = array_values($values);
+    } else {
+        // In our else case, the value is not present yet (i.e. not yet in the query string). We will toggle it ON by appending it to the array.
+        $values[] = $val;
     }
+
+    // After toggling our single value, if the list for that filter is empty, we need to delete the filter key entirely. This will keep the URL tidy, our state accurate, and our later checks straightforward.
+    if (!empty($values)) { // If the list for this filter still has at least one item ...
+        $filters[$filter] = $values; 
+    } else { // else, if the list is now empty because we toggled the last item off ...
+        unset($filters[$filter]);
+    }
+
+    // Turn the filters back into a neat little query string and hand back the full URL.
+    return $base_url . '?' . http_build_query($filters);
 }
+
+
 
 ?>
 
@@ -99,10 +123,28 @@ foreach ($filters as $filter => $options) {
 
     // The inner foreach loop will bring us through all of the values for each of the four categories.
     echo '<div class="btn-group mb-3" role="group" aria-label="' . htmlspecialchars($filter) . ' Filter Group">';
+    
     foreach ($options as $value => $label) {
+        // Is the option that we're currently generating already active (i.e. has the user previously clicked on it)?
+        $is_active = in_array($value, $active_filters[$filter] ?? []);
 
+        // Let's use the custom function from earlier to build a unique href value (incl. query string) for the button we're making.
+        $url = build_query_url($_SERVER['PHP_SELF'], $active_filters, $filter, $value);
+
+        echo '<a href="' . $url . '" class="btn ' .
+            ($is_active ? 'btn-success' : 'btn-outline-success') . '" aria-pressed="' .
+            ($is_active ? 'true' : 'false') . '">' .
+            $label . '</a>';
     }
+
     echo '</div>';
+}
+
+// If there are active filters, we'll also give the user a 'clear filters' button. This literally just links to the same page but without a query string.
+if (!empty($active_filters)) {
+    echo '<div class="my-5"><a href="filters.php" class="btn btn-danger">Clear Filters</a></div>';
+
+    include 'includes/filter-results.php';
 }
 
 ?>
