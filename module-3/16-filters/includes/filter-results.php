@@ -40,7 +40,14 @@ if (!empty($active_filters)) {
         exit();
     }
 
-    // TO DO: splat the params
+    // Let's bind our parameters. Because we don't know how many there are (we don't know how many things the user chose), we can use the splat operator (...) to figure it out for us.
+    $statement->bind_param($types, ...$parameters);
+    
+    // Now, let's execute the statement.
+    if (!$statement->execute()) {
+        echo "<p>Error retrieving data. Please try again later.</p>";
+        exit();
+    }
 
     $result = $statement->get_result();
 
