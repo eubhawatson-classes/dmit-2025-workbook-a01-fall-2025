@@ -17,4 +17,52 @@
     8. Close the prepared statement after finished to free up server resources.
 */
 
+/**
+ * This function executes a prepared statement with a provided query and its parameters.
+ * 
+ * @param string - $query 
+ * @param array - $params
+ * @param string - $types
+ * @return mixed - Result set for SELECT queries, or TRUE/FALSE for other queries.
+ */
+function execute_prepared_statement($query, $params = [], $types = "") {
+    global $connection;
+
+    $statement = $connection->prepare($query);
+
+    // If our preparation fail, we need to handle the error and quit this function.
+    if (!$statement) {
+        die("Preparation failed: " . $connection->error);
+    }
+
+    // If we need to bind any parameters (i.e. if we're adding, editing, or deleting), we'll do so here. 
+    if (!empty($params)) {
+        $statement->bind_param($types, ...$params);
+    }
+
+    // This executes the statement right from within our IF condition.
+    if (!$statement->execute()) {
+        die("Execution failed: " . $statement->error);
+    }
+
+    // If it's a SELECT query, we should return the results so that we can print them out for the user.
+    if (str_starts_with(strtoupper($query), "SELECT")) {
+        return $statement->get_result();
+    }
+
+    // If we successfully executed our prepared statement (and it isn't a SELECT statement), this whole function will return TRUE.
+    return TRUE;
+}
+
+/**
+ * This function retrieves all cities using a simple SELECT statement.
+ * There are no user-provided values or ?s required here.
+ */
+function get_all_cities() {
+    $query = "SELECT * FROM cities;";
+    $result = execute_prepared_statement($query);
+
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+
 ?>
