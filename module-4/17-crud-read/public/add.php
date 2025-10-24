@@ -1,0 +1,8 @@
+<?php
+
+$title = "Add a City";
+$introduction = "To add a city to our database, simply fill out the form below and hit 'Save'.";
+include 'includes/header.php';
+
+
+include 'includes/footer.php'; ?>
