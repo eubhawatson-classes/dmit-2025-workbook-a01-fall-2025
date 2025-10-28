@@ -72,4 +72,88 @@ function generate_table() {
     }
 }
 
+
+/* DATA VALIDATION */
+
+/**
+ * This will validate our user input on the add and edit pages of our application.
+ * 
+ * @param string $city_name
+ * @param string $province
+ * @param int $population
+ * @param int $capital (boolean, passed as a TINY INT)
+ * @param string $trivia (optional; may be left NULL)
+ * @param array $provincial_abbr
+ * @return array 
+ */
+function validate_city_input($city_name, $province, $population, $capital, $trivia, $provincial_abbr) {
+
+    global $connection;
+    $errors = [];
+    $validated_data = [];
+
+    // Validate city name
+    $city_name = trim($city_name);
+    if (empty($city_name)) {
+        $errors[] = "City name is required.";
+    } elseif (strlen($city_name) < 2 || strlen($city_name) > 36) {
+        $errors[] = "City name must be between 2 and 30 characters.";
+    } elseif (preg_match('/["\']/', $city_name)) { // Sanitize quotes
+        $city_name = mysqli_real_escape_string($connection, $city_name);
+    }
+
+    $validated_data['city_name'] = $city_name;
+
+    // Validate province
+    if (empty($province)) {
+        $errors[] = "Province is required.";
+    } elseif (!array_key_exists($province, $provincial_abbr)) {
+        $errors[] = "Invalid province selected.";
+    }
+
+    $validated_data['province'] = $province;
+
+    // Validate population
+    $population = filter_var($population, FILTER_SANITIZE_NUMBER_INT);
+    if (empty($population)) {
+        $errors[] = "Population is required.";
+    } elseif (!filter_var($population, FILTER_VALIDATE_INT, ["options" => ["min_range" => 1]])) {
+        $errors[] = "Population must be a positive number.";
+    }
+
+    $validated_data['population'] = $population;
+
+    // Validate capital
+    if (isset($capital)) {
+        if ($capital !== '1' && $capital !== '0') {
+            $errors[] = "Invalid selection for capital.";
+        } else {
+            // Convert the value to a boolean: true if '1', false if '0'.
+            $validated_data['capital'] = ($capital === '1');
+        }
+    } else {
+        // Default to 0 (or false) if no selection is made.
+        $validated_data['capital'] = 0;
+    }
+
+    // Validate trivia (this field is optional)
+    $trivia = trim($trivia);
+    if (!empty($trivia)) {
+        if (strlen($trivia) > 255) {
+            $errors[] = "City trivia must be 255 characters or fewer.";
+        }
+        // Use mysqli_real_escape_string to help sanitize input before database insertion.
+        $validated_data['trivia'] = mysqli_real_escape_string($connection, $trivia);
+    } else {
+        $validated_data['trivia'] = null;
+    }
+
+    // A function can only return one value, so we're packing a few things into an array.
+    return [
+        'is_valid' => empty($errors),
+        'errors' => $errors,
+        'data' => $validated_data
+    ];
+
+}
 ?>

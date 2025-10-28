@@ -65,4 +65,26 @@ function get_all_cities() {
     return $result->fetch_all(MYSQLI_ASSOC);
 }
 
+/**
+ * INSERT (i.e. create or add) a new city into the database; used in the Add page.
+ * 
+ * @param string $city_name
+ * @param string|ENUM $province
+ * @param int $population
+ * @param int|BOOL $is_capital
+ * @param string|NULL $trivia
+ * 
+ * @return BOOL - whether or not the prepared statement was properly executed.
+ */
+function insert_city($city_name, $province, $population, $is_capital, $trivia) {
+    // Since city trivia is optional and may be left empty, we'll set any empty responses to NULL.
+    if (empty($trivia)) {
+        $trivia = NULL;
+    }
+
+    $query = "INSERT INTO cities (`city_name`, `province`, `population`, `is_capital`, `trivia`) VALUES (?, ?, ?, ?, ?);";
+
+    return execute_prepared_statement($query, [$city_name, $province, $population, $is_capital, $trivia], "ssiis");
+}
+
 ?>
