@@ -23,6 +23,26 @@ if (!$city_id || !$city_name) {
 }
 
 // TODO: Let's handle the deletion here.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $hidden_id = filter_input(INPUT_POST, 'hidden-id', FILTER_VALIDATE_INT);
+    $hidden_name = filter_input(INPUT_POST, 'hidden-name', FILTER_SANITIZE_SPECIAL_CHARS);
+
+    if ($hidden_id) {
+        // Call the delete a city function.
+        delete_city($hidden_id);
+
+        $message = "<p>" . urldecode($hidden_name) . " was deleted from the database.</p>";
+        $city_id = NULL;
+    }
+}
+
+if ($message != "") : ?>
+
+    <div class="alert alert-danger text-center" role="alert">
+        <?= $message; ?>
+    </div>
+
+<?php endif;
 
 // If the user has just selected a city from the delete page, they'll have the city_id in their query string. In that case, we'll give them the big red delete button.
 if ($city_id) : ?>

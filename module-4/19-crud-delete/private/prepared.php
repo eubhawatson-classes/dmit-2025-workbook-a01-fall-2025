@@ -87,4 +87,17 @@ function insert_city($city_name, $province, $population, $is_capital, $trivia) {
     return execute_prepared_statement($query, [$city_name, $province, $population, $is_capital, $trivia], "ssiis");
 }
 
+
+/**
+ * DELETE a city using the city ID (i.e. the primary key); returns TRUE or FALSE.
+ * 
+ * @param int $cid - the primary key.
+ * 
+ * @return BOOL|mysqli_result
+ */
+function delete_city($cid) {
+    $query = "DELETE FROM cities WHERE cid = ?;";
+    return execute_prepared_statement($query, [$cid], "i");
+}
+
 ?>
