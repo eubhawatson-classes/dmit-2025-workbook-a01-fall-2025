@@ -1,3 +1,12 @@
+<?php
+
+session_start();
+
+require_once dirname(__DIR__, 4) . '/data/connect.php';
+$connection = db_connect();
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
