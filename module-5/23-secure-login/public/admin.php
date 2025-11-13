@@ -1,5 +1,6 @@
 <?php
 
+require_once '../private/authentication.php';
 // TODO: Add authentication functions.
 
 $title = "Private Page (Admin)";
