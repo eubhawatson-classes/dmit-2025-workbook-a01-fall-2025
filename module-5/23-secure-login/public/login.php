@@ -18,7 +18,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);
     $password = $_POST['password'];
 
-    
+    if (authenticate($username, $password)) {
+        header("Location: admin.php");
+        exit();
+    } else {
+        $error = "Invalid username or password.";
+    }
 }
 
 $title = "Login Page";
@@ -29,6 +34,10 @@ include 'includes/header.php';
 ?>
 
 <h2 class="fw-light my-3">Login Form</h2>
+
+<?php if ($error != "") : ?>
+    <p class="text-center text-danger"><?= $error; ?></p>
+<?php endif; ?>
 
 <form action="<?= htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST">
 
