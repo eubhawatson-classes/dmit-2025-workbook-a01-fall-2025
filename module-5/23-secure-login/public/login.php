@@ -11,6 +11,12 @@
 
 require_once '../private/authentication.php';
 
+// If the user is already logged in, they shouldn't be allowed on this page.
+if (is_logged_in()) {
+    header("Location: admin.php");
+    exit();
+}
+
 $error = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
