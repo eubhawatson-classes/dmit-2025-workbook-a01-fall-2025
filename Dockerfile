@@ -11,9 +11,14 @@ RUN apt-get update && \
       libpng-dev \
       libwebp-dev \
       libavif-dev \
+      libaom-dev \
+      libdav1d-dev \
+      libyuv-dev \
     && docker-php-ext-configure gd \
       --with-freetype=/usr/include/ \
       --with-jpeg=/usr/include/ \
+      --with-webp \
+      --with-avif \
     && docker-php-ext-install -j"$(nproc)" \
       gd \
       pdo_mysql \
